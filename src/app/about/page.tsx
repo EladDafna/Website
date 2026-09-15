@@ -15,22 +15,22 @@ export const metadata: Metadata = {
 --------------------------------------------------------------------------- */
 const intro = [
   `I am ${siteConfig.name}, a ${siteConfig.role.toLowerCase()} based in ${siteConfig.location}. I like problems that start out vague and end up as something dependable that other people can run without thinking about it.`,
-  "Most of my time goes into backend and infrastructure work: designing the data flow, getting the failure cases right, and keeping the operational surface small. I care about code that is boring to maintain.",
-  "The list of projects on this site is generated directly from my GitHub account, so it reflects what I am actually working on rather than a curated snapshot from a year ago.",
+  "My work sits between the code and the machines it runs on: infrastructure as code, container orchestration, delivery pipelines and the monitoring that tells you when any of it stops behaving. Terraform, Kubernetes, Ansible, Jenkins and GitHub Actions are where most of my hours go.",
+  "The projects on this site are generated directly from my GitHub account, so the list reflects what I am actually building rather than a curated snapshot from a year ago.",
 ];
 
 const principles = [
   {
-    title: "Build it so it can be debugged",
-    body: "Good logs, clear errors and a straight path from symptom to cause are worth more than clever abstractions.",
+    title: "Infrastructure as code, always",
+    body: "If a server cannot be rebuilt from a repository, it is not infrastructure. It is a liability waiting for the next outage.",
   },
   {
     title: "Automate the boring parts",
     body: "Anything done by hand twice is a script. Anything scripted twice belongs in the pipeline.",
   },
   {
-    title: "Ship, then refine",
-    body: "A working version in production teaches you more in a week than another month of design discussion.",
+    title: "You cannot fix what you cannot see",
+    body: "Metrics, logs and alerts come with the system, not after the first incident that nobody noticed for a day.",
   },
 ];
 

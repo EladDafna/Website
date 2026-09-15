@@ -8,24 +8,35 @@
 
 export const siteConfig = {
   name: "Elad Dafna",
-  role: "Software Engineer",
+  role: "DevOps Engineer",
   tagline: "I build systems that hold up in production.",
   description:
-    "Personal portfolio of Elad Dafna - projects, work and writing, pulled live from GitHub.",
+    "Personal portfolio of Elad Dafna, DevOps engineer. Infrastructure, automation and delivery pipelines, pulled live from GitHub.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com",
   email: "elad.dafna@hiper-global.com",
   location: "Israel",
 } as const;
 
-/** GitHub account the portfolio pulls its repositories from. */
+/**
+ * GitHub account the portfolio pulls its repositories from.
+ * The default is used when no environment variable is set, so the site works
+ * on a fresh deploy with no configuration.
+ */
 export const githubUsername =
-  process.env.NEXT_PUBLIC_GITHUB_USERNAME?.trim() || "";
+  process.env.NEXT_PUBLIC_GITHUB_USERNAME?.trim() || "EladDafna";
 
 /**
  * Repositories listed here are pinned to the front of the grid, in this order.
  * Names are matched case-insensitively against the repository name.
  */
-export const featuredRepos: string[] = [];
+export const featuredRepos: string[] = [
+  "Terraform_Project",
+  "Kubernetes-Helm_Project",
+  "Ansible-Kubernetes_Project",
+  "Prometheus_Grafana_Project",
+  "CI-CD",
+  "GitHub_Actions_Project",
+];
 
 /**
  * Repositories listed here are never shown, in addition to the automatic
