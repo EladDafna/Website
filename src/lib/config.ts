@@ -78,7 +78,7 @@ export const featuredRepos: string[] = [
  * Repositories listed here are never shown, in addition to the automatic
  * filters (forks, archived, the profile README repo).
  */
-export const hiddenRepos: string[] = [];
+export const hiddenRepos: string[] = ["PS", "Test", "Projects"];
 
 /** Links rendered in the header and footer. */
 export const socialLinks = [
