@@ -5,9 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
 import type { Repo } from "@/lib/github";
 
-type SortKey = "recent" | "stars" | "name";
+type SortKey = "featured" | "recent" | "stars" | "name";
 
 const sortOptions: { key: SortKey; label: string }[] = [
+  { key: "featured", label: "Featured first" },
   { key: "recent", label: "Recently updated" },
   { key: "stars", label: "Most starred" },
   { key: "name", label: "Name" },
@@ -16,7 +17,7 @@ const sortOptions: { key: SortKey; label: string }[] = [
 export default function ProjectGrid({ repos }: { repos: Repo[] }) {
   const [query, setQuery] = useState("");
   const [language, setLanguage] = useState<string>("All");
-  const [sort, setSort] = useState<SortKey>("recent");
+  const [sort, setSort] = useState<SortKey>("featured");
   const reduceMotion = useReducedMotion();
 
   const languages = useMemo(() => {
@@ -47,11 +48,13 @@ export default function ProjectGrid({ repos }: { repos: Repo[] }) {
       sorted.sort((a, b) => b.stars - a.stars);
     } else if (sort === "name") {
       sorted.sort((a, b) => a.name.localeCompare(b.name));
-    } else {
+    } else if (sort === "recent") {
       sorted.sort(
         (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
     }
+    // "featured" keeps the order the server produced, which is already the
+    // pinned repositories first, then the most starred, then the most recent.
     return sorted;
   }, [repos, query, language, sort]);
 
