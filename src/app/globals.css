@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Dark space / neon palette.
+   The site is dark-only by design, so the tokens are defined once.
+--------------------------------------------------------------------------- */
+:root {
+  --background: #04050d;
+  --surface: #0a0c1a;
+  --surface-raised: #10132a;
+  --border: #1e2344;
+  --foreground: #e7ecf7;
+  --muted: #96a0c2;
+  --neon-cyan: #22d3ee;
+  --neon-violet: #a855f7;
+  --neon-pink: #f472b6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-subtle: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-violet: var(--neon-violet);
+  --color-neon-pink: var(--neon-pink);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+/* The 3D canvas sits behind everything and never intercepts clicks. */
+.scene-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.content-layer {
+  position: relative;
+  z-index: 1;
+}
+
+/* A soft aurora wash layered over the star field, pure CSS so it costs nothing. */
+.aurora::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, color-mix(in oklab, var(--neon-violet) 18%, transparent), transparent 70%),
+    radial-gradient(50rem 35rem at 85% 0%, color-mix(in oklab, var(--neon-cyan) 14%, transparent), transparent 70%),
+    radial-gradient(45rem 45rem at 50% 110%, color-mix(in oklab, var(--neon-pink) 10%, transparent), transparent 70%);
+}
+
+/* ---------------------------------------------------------------------------
+   Reusable pieces
+--------------------------------------------------------------------------- */
+
+.neon-text {
+  background: linear-gradient(110deg, var(--neon-cyan), var(--neon-violet) 55%, var(--neon-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.card-glow {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.card-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(130deg, var(--neon-cyan), var(--neon-violet), var(--neon-pink));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: -1;
+}
+
+.card-glow:hover::after,
+.card-glow:focus-within::after {
+  opacity: 1;
+}
+
+.card-glow:hover {
+  transform: translateY(-4px);
+}
+
+/* Thin, unobtrusive scrollbar that matches the palette. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--neon-violet) 50%, var(--border));
+}
+
+::selection {
+  background: color-mix(in oklab, var(--neon-violet) 45%, transparent);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+--------------------------------------------------------------------------- */
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .card-glow:hover {
+    transform: none;
+  }
+}
