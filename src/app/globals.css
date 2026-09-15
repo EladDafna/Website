@@ -50,6 +50,13 @@ body {
   pointer-events: none;
 }
 
+.scene-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--background) 38%, transparent);
+}
+
 .content-layer {
   position: relative;
   z-index: 1;
@@ -116,8 +123,51 @@ body {
   opacity: 1;
 }
 
-.card-glow:hover {
-  transform: translateY(-4px);
+/* ---------------------------------------------------------------------------
+   3D tilt
+   The wrapper owns the perspective; the card itself is what rotates, so the
+   lift and the lean compose into a single transform instead of fighting.
+--------------------------------------------------------------------------- */
+
+.tilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  height: 100%;
+  perspective: 900px;
+}
+
+.tilt > * {
+  height: 100%;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.tilt:hover > * {
+  transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(-5px) scale(1.015);
+}
+
+/* A highlight that follows the cursor, which is what sells the surface as physical. */
+.tilt > *::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    18rem circle at var(--mx) var(--my),
+    color-mix(in oklab, var(--neon-cyan) 12%, transparent),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.tilt:hover > *::before {
+  opacity: 1;
 }
 
 /* Thin, unobtrusive scrollbar that matches the palette. */
@@ -180,7 +230,11 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-  .card-glow:hover {
+  .tilt > *,
+  .tilt:hover > * {
     transform: none;
+  }
+  .tilt > *::before {
+    display: none;
   }
 }

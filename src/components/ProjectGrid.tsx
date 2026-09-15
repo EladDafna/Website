@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
+import TiltCard from "@/components/TiltCard";
 import type { Repo } from "@/lib/github";
 
 type SortKey = "featured" | "recent" | "stars" | "name";
@@ -146,7 +147,9 @@ export default function ProjectGrid({ repos }: { repos: Repo[] }) {
                 }}
                 className="relative"
               >
-                <ProjectCard repo={repo} />
+                <TiltCard>
+                  <ProjectCard repo={repo} />
+                </TiltCard>
               </motion.li>
             ))}
           </AnimatePresence>

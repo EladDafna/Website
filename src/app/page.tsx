@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import ProjectCard from "@/components/ProjectCard";
 import Reveal from "@/components/Reveal";
 import SetupNotice from "@/components/SetupNotice";
+import TiltCard from "@/components/TiltCard";
 import { githubUsername } from "@/lib/config";
 import { getRepos, summarize } from "@/lib/github";
 import { compactNumber } from "@/lib/format";
@@ -75,7 +76,9 @@ export default async function Home() {
               {highlights.map((repo, index) => (
                 <li key={repo.id} className="relative">
                   <Reveal delay={Math.min(index * 0.06, 0.3)} className="h-full">
-                    <ProjectCard repo={repo} />
+                    <TiltCard>
+                      <ProjectCard repo={repo} />
+                    </TiltCard>
                   </Reveal>
                 </li>
               ))}

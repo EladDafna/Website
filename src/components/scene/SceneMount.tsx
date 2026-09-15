@@ -16,6 +16,8 @@ export default function SceneMount() {
   return (
     <div className="scene-layer" aria-hidden="true">
       <SpaceScene />
+      {/* Knocks the scene back so body copy keeps its contrast over it. */}
+      <div className="scene-scrim" />
     </div>
   );
 }

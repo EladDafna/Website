@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { PointMaterial, Points, Stars } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+  AdaptiveDpr,
+  Float,
+  MeshDistortMaterial,
+  PerformanceMonitor,
+  PointMaterial,
+  Points,
+} from "@react-three/drei";
 import {
   AdditiveBlending,
   Group,
@@ -26,16 +33,54 @@ function makeRandom(seed: number): () => number {
   };
 }
 
-/** Drifting coloured dust, closer to the camera than the star field. */
-function Dust({ count = 1400 }: { count?: number }) {
+type FieldProps = {
+  count: number;
+  /** Inner and outer radius of the spherical shell the points sit in. */
+  inner: number;
+  outer: number;
+  /** World units when `attenuate` is on, screen pixels when it is off. */
+  size: number;
+  /**
+   * Whether points shrink with distance. Off gives every point the same pixel
+   * size, which is what a star field wants and which removes any chance of a
+   * near point being drawn as a huge disc.
+   */
+  attenuate: boolean;
+  color: string;
+  opacity: number;
+  seed: number;
+  spin: number;
+  animate: boolean;
+};
+
+/**
+ * A shell of points around the camera.
+ *
+ * This replaces drei's <Stars>, whose vertex shader sizes each sprite by
+ * `30.0 / -mvPosition.z`. Stars at a grazing view angle have a view-space z
+ * near zero, so that term explodes and the sprite is drawn as a huge grey
+ * disc over the page. Sizing through PointMaterial avoids the blow-up.
+ */
+function ParticleField({
+  count,
+  inner,
+  outer,
+  size,
+  attenuate,
+  color,
+  opacity,
+  seed,
+  spin,
+  animate,
+}: FieldProps) {
   const ref = useRef<ThreePoints>(null);
 
   const positions = useMemo(() => {
-    const random = makeRandom(0x5eed1e);
+    const random = makeRandom(seed);
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i += 1) {
       // Even distribution across a spherical shell around the camera.
-      const radius = 7 + random() * 17;
+      const radius = inner + random() * (outer - inner);
       const theta = random() * Math.PI * 2;
       const phi = Math.acos(2 * random() - 1);
       arr[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
@@ -43,60 +88,116 @@ function Dust({ count = 1400 }: { count?: number }) {
       arr[i * 3 + 2] = radius * Math.cos(phi);
     }
     return arr;
-  }, [count]);
+  }, [count, inner, outer, seed]);
 
   useFrame((_, delta) => {
     const points = ref.current;
-    if (!points) return;
-    points.rotation.y += delta * 0.018;
-    points.rotation.x += delta * 0.007;
+    if (!points || !animate) return;
+    points.rotation.y += delta * spin;
+    points.rotation.x += delta * spin * 0.4;
   });
 
   return (
     <Points ref={ref} positions={positions} stride={3} frustumCulled={false}>
       <PointMaterial
         transparent
-        color="#8fb6ff"
-        size={0.055}
-        sizeAttenuation
+        color={color}
+        size={size}
+        sizeAttenuation={attenuate}
         depthWrite={false}
         blending={AdditiveBlending}
-        opacity={0.75}
+        opacity={opacity}
       />
     </Points>
   );
 }
 
-/** Nested wireframe icosahedra that read as a slowly turning neon core. */
-function Core() {
+/**
+ * The neon centrepiece: a soft distorting inner mass wrapped in two wireframe
+ * shells. It is parked to the right of centre so it never sits behind the
+ * headline, and pushed back in z so the copy always reads in front of it.
+ */
+function Core({ animate }: { animate: boolean }) {
   const ref = useRef<Group>(null);
+  const { viewport } = useThree();
+
+  // Wide screens have room beside the text column. Narrow ones do not, so the
+  // shape drops below the hero copy instead of sitting behind it.
+  const wide = viewport.width > 9;
+  const position: [number, number, number] = wide
+    ? [viewport.width * 0.26, 0.2, -1.4]
+    : [0, -3.4, -2.6];
+  const scale = wide ? 1 : 0.8;
 
   useFrame((state, delta) => {
     const group = ref.current;
-    if (!group) return;
+    if (!group || !animate) return;
     group.rotation.y += delta * 0.1;
     group.rotation.x += delta * 0.04;
-    // Breathe very slightly so the shape never looks frozen.
     const pulse = 1 + Math.sin(state.clock.elapsedTime * 0.6) * 0.015;
-    group.scale.setScalar(pulse);
+    group.scale.setScalar(pulse * scale);
   });
 
   return (
-    <group ref={ref}>
-      <mesh>
-        <icosahedronGeometry args={[2.4, 1]} />
-        <meshBasicMaterial wireframe transparent color="#22d3ee" opacity={0.26} />
-      </mesh>
-      <mesh scale={0.78}>
-        <icosahedronGeometry args={[2.4, 0]} />
-        <meshBasicMaterial wireframe transparent color="#a855f7" opacity={0.2} />
-      </mesh>
-      <mesh scale={0.5}>
-        <icosahedronGeometry args={[2.4, 0]} />
-        <meshBasicMaterial wireframe transparent color="#f472b6" opacity={0.12} />
-      </mesh>
-    </group>
+    <Float
+      speed={animate ? 1.1 : 0}
+      rotationIntensity={animate ? 0.25 : 0}
+      floatIntensity={animate ? 0.7 : 0}
+      floatingRange={[-0.25, 0.25]}
+    >
+      <group ref={ref} position={position} scale={scale}>
+        <mesh>
+          <icosahedronGeometry args={[2.4, 1]} />
+          <meshBasicMaterial wireframe transparent color="#22d3ee" opacity={0.22} />
+        </mesh>
+        <mesh scale={0.78}>
+          <icosahedronGeometry args={[2.4, 0]} />
+          <meshBasicMaterial wireframe transparent color="#a855f7" opacity={0.17} />
+        </mesh>
+        {/*
+          Kept as a wireframe rather than a solid. A filled mesh here read as an
+          opaque grey mass that sat on top of the headline and killed contrast.
+        */}
+        <mesh scale={0.52}>
+          <icosahedronGeometry args={[2.4, 5]} />
+          <MeshDistortMaterial
+            wireframe
+            color="#f472b6"
+            transparent
+            opacity={0.22}
+            distort={animate ? 0.4 : 0}
+            speed={animate ? 1.6 : 0}
+          />
+        </mesh>
+      </group>
+    </Float>
   );
+}
+
+/**
+ * Ties the scene to the page scroll so the whole background has real depth:
+ * the camera dollies in slightly and the scene rolls as you move down.
+ */
+function ScrollRig({ enabled }: { enabled: boolean }) {
+  const progress = useRef(0);
+
+  // The camera is read off the frame state rather than from useThree(), so the
+  // per-frame mutation happens on a value this component does not own.
+  useFrame((state, delta) => {
+    if (!enabled) return;
+    const doc = document.documentElement;
+    const scrollable = Math.max(doc.scrollHeight - window.innerHeight, 1);
+    const target = MathUtils.clamp(window.scrollY / scrollable, 0, 1);
+    progress.current = MathUtils.damp(progress.current, target, 3, delta);
+
+    const { camera } = state;
+    camera.position.z = 9 - progress.current * 2.4;
+    camera.position.y = progress.current * 1.1;
+    camera.rotation.z = progress.current * 0.12;
+    camera.lookAt(0, progress.current * 0.4, 0);
+  });
+
+  return null;
 }
 
 /** Tilts the whole scene a few degrees toward the pointer. */
@@ -123,6 +224,7 @@ function Parallax({
 
 export default function SpaceScene() {
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [dpr, setDpr] = useState(1.5);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -132,26 +234,61 @@ export default function SpaceScene() {
     return () => query.removeEventListener("change", update);
   }, []);
 
+  const animate = !reducedMotion;
+
   return (
     <Canvas
       camera={{ position: [0, 0, 9], fov: 60 }}
-      dpr={[1, 1.75]}
+      dpr={dpr}
       gl={{ antialias: false, powerPreference: "high-performance" }}
-      frameloop={reducedMotion ? "demand" : "always"}
+      frameloop={animate ? "always" : "demand"}
       style={{ width: "100%", height: "100%" }}
     >
-      <Parallax enabled={!reducedMotion}>
-        <Stars
-          radius={80}
-          depth={45}
-          count={4200}
-          factor={3.4}
-          saturation={0}
-          fade
-          speed={reducedMotion ? 0 : 0.4}
+      {/* Drop resolution rather than frames if the GPU cannot keep up. */}
+      <PerformanceMonitor
+        onDecline={() => setDpr(1)}
+        onIncline={() => setDpr(1.75)}
+      />
+      <AdaptiveDpr pixelated />
+
+      <ambientLight intensity={0.6} />
+      <pointLight position={[6, 4, 6]} intensity={40} color="#22d3ee" />
+      <pointLight position={[-6, -3, 4]} intensity={30} color="#f472b6" />
+
+      <ScrollRig enabled={animate} />
+
+      <Parallax enabled={animate}>
+        {/* Far, dense, near-white: reads as the star field. Fixed pixel size. */}
+        <ParticleField
+          count={3600}
+          inner={30}
+          outer={95}
+          size={1.8}
+          attenuate={false}
+          color="#dce7ff"
+          opacity={0.9}
+          seed={0x5741225}
+          spin={0.004}
+          animate={animate}
         />
-        <Dust />
-        <Core />
+        {/*
+          Near, sparse, blue: gives the field real parallax depth. The inner
+          radius stays well outside the camera's own orbit (z 6.6 to 9.1) so no
+          particle can end up a fraction of a unit from the lens.
+        */}
+        <ParticleField
+          count={900}
+          inner={17}
+          outer={34}
+          size={0.05}
+          attenuate
+          color="#8fb6ff"
+          opacity={0.7}
+          seed={0x5eed1e}
+          spin={0.018}
+          animate={animate}
+        />
+        <Core animate={animate} />
       </Parallax>
     </Canvas>
   );

@@ -37,9 +37,11 @@ export default function ProjectCard({ repo }: { repo: Repo }) {
         )}
       </div>
 
-      <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-muted">
-        {repo.description ?? "No description provided."}
-      </p>
+      {repo.description && (
+        <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-muted">
+          {repo.description}
+        </p>
+      )}
 
       {repo.topics.length > 0 && (
         <ul className="mb-5 flex flex-wrap gap-1.5">
