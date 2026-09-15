@@ -7,14 +7,19 @@ import { githubUsername, siteConfig } from "@/lib/config";
 export default function Hero() {
   const reduceMotion = useReducedMotion();
 
-  const rise = (delay: number) =>
-    reduceMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 26 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const },
-        };
+  /**
+   * `animate` is always supplied, so the element is guaranteed to end up
+   * visible. Dropping the motion props entirely under reduced motion used to
+   * leave the server-rendered `opacity: 0` in place with nothing to clear it,
+   * which blanked the page until a client-side navigation remounted it.
+   */
+  const rise = (delay: number) => ({
+    initial: reduceMotion ? (false as const) : { opacity: 0, y: 26 },
+    animate: { opacity: 1, y: 0 },
+    transition: reduceMotion
+      ? { duration: 0 }
+      : { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const },
+  });
 
   return (
     <section className="relative mx-auto flex min-h-[calc(100svh-5rem)] max-w-6xl flex-col justify-center px-5 py-20 sm:px-8">

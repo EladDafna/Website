@@ -43,6 +43,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="aurora flex min-h-full flex-col">
+        {/*
+          Entrance animations are server-rendered in their hidden state. Without
+          JavaScript nothing would ever reveal them, so force everything visible.
+        */}
+        <noscript>
+          <style>{`[style*="opacity:0"]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         <SceneMount />
         <div className="content-layer flex min-h-full flex-1 flex-col">
           <Nav />
