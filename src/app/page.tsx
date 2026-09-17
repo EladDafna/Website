@@ -27,23 +27,25 @@ export default async function Home() {
         <>
           <section className="mx-auto max-w-6xl px-5 sm:px-8">
             <Reveal>
-              <dl className="glass grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4">
-                {[
-                  { label: "Public repos", value: String(total) },
-                  { label: "Total stars", value: compactNumber(stars) },
-                  { label: "Languages", value: String(topLanguages.length) },
-                  { label: "Main stack", value: topLanguages[0]?.name ?? "—" },
-                ].map((stat) => (
-                  <div key={stat.label} className="px-6 py-7">
-                    <dt className="text-xs uppercase tracking-wider text-muted">
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-2 text-2xl font-semibold tracking-tight">
-                      {stat.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <TiltCard>
+                <dl className="card-glow glass grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4">
+                  {[
+                    { label: "Public repos", value: String(total) },
+                    { label: "Total stars", value: compactNumber(stars) },
+                    { label: "Languages", value: String(topLanguages.length) },
+                    { label: "Main stack", value: topLanguages[0]?.name ?? "—" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="px-6 py-7">
+                      <dt className="text-xs uppercase tracking-wider text-muted">
+                        {stat.label}
+                      </dt>
+                      <dd className="mt-2 text-2xl font-semibold tracking-tight">
+                        {stat.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </TiltCard>
             </Reveal>
           </section>
 

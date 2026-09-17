@@ -39,7 +39,7 @@ export default function Nav() {
           href="/"
           className="group flex items-center gap-2.5 text-sm font-semibold tracking-tight"
         >
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-surface-raised text-neon-cyan ring-1 ring-border-subtle transition-transform duration-300 group-hover:scale-105">
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-surface-raised text-neon-cyan ring-1 ring-border-subtle transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_16px_-2px_var(--neon-cyan)]">
             <span className="font-mono text-[13px]">ED</span>
           </span>
           <span className="hidden sm:inline">{siteConfig.name}</span>
@@ -57,7 +57,7 @@ export default function Nav() {
                 }`}
               >
                 {isActive(link.href) && (
-                  <span className="absolute inset-0 rounded-full bg-surface-raised ring-1 ring-border-subtle" />
+                  <span className="absolute inset-0 rounded-full bg-surface-raised shadow-[0_0_14px_-4px_var(--neon-cyan)] ring-1 ring-neon-cyan/40" />
                 )}
                 <span className="relative">{link.label}</span>
               </Link>

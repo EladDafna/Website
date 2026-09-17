@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import TiltCard from "@/components/TiltCard";
 import { siteConfig, socialLinks } from "@/lib/config";
 import { colorForLanguage, getProfile, getRepos, summarize } from "@/lib/github";
 
@@ -47,39 +48,41 @@ export default async function AboutPage() {
       </Reveal>
 
       <Reveal delay={0.06} className="mt-10">
-        <div className="glass flex flex-col gap-6 rounded-2xl p-7 sm:flex-row sm:items-center">
-          {profile?.avatarUrl && (
-            <Image
-              src={profile.avatarUrl}
-              alt=""
-              width={96}
-              height={96}
-              className="h-24 w-24 shrink-0 rounded-2xl ring-1 ring-border-subtle"
-            />
-          )}
-          <div className="min-w-0">
-            <p className="text-lg font-semibold tracking-tight">
-              {profile?.name ?? siteConfig.name}
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              {profile?.bio ?? `${siteConfig.role} · ${siteConfig.location}`}
-            </p>
-            {profile && (
-              <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
-                <li>
-                  <span className="text-foreground">{total}</span> public repos
-                </li>
-                <li>
-                  <span className="text-foreground">{stars}</span> stars earned
-                </li>
-                <li>
-                  <span className="text-foreground">{profile.followers}</span>{" "}
-                  followers
-                </li>
-              </ul>
+        <TiltCard>
+          <div className="card-glow glass flex flex-col gap-6 rounded-2xl p-7 sm:flex-row sm:items-center">
+            {profile?.avatarUrl && (
+              <Image
+                src={profile.avatarUrl}
+                alt=""
+                width={96}
+                height={96}
+                className="h-24 w-24 shrink-0 rounded-2xl ring-1 ring-border-subtle"
+              />
             )}
+            <div className="min-w-0">
+              <p className="text-lg font-semibold tracking-tight">
+                {profile?.name ?? siteConfig.name}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {profile?.bio ?? `${siteConfig.role} · ${siteConfig.location}`}
+              </p>
+              {profile && (
+                <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
+                  <li>
+                    <span className="text-foreground">{total}</span> public repos
+                  </li>
+                  <li>
+                    <span className="text-foreground">{stars}</span> stars earned
+                  </li>
+                  <li>
+                    <span className="text-foreground">{profile.followers}</span>{" "}
+                    followers
+                  </li>
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
+        </TiltCard>
       </Reveal>
 
       <Reveal delay={0.1} className="mt-12">
@@ -124,39 +127,45 @@ export default async function AboutPage() {
         <h2 className="text-2xl font-semibold tracking-tight">How I work</h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {principles.map((item) => (
-            <li key={item.title} className="glass rounded-2xl p-6">
-              <h3 className="text-sm font-semibold tracking-tight text-neon-cyan">
-                {item.title}
-              </h3>
-              <p className="mt-2.5 text-sm leading-relaxed text-muted">
-                {item.body}
-              </p>
+            <li key={item.title} className="relative">
+              <TiltCard>
+                <div className="card-glow glass h-full rounded-2xl p-6">
+                  <h3 className="text-sm font-semibold tracking-tight text-neon-cyan">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-muted">
+                    {item.body}
+                  </p>
+                </div>
+              </TiltCard>
             </li>
           ))}
         </ul>
       </Reveal>
 
       <Reveal delay={0.22} className="mt-16">
-        <div className="glass rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">Get in touch</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted">
-            Open to interesting problems, collaborations and questions about
-            anything on this site.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {socialLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target={link.href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full bg-surface-raised px-5 py-2.5 text-sm ring-1 ring-border-subtle transition-colors hover:text-neon-cyan"
-              >
-                {link.label}
-              </a>
-            ))}
+        <TiltCard>
+          <div className="card-glow glass rounded-2xl p-8 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight">Get in touch</h2>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted">
+              Open to interesting problems, collaborations and questions about
+              anything on this site.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target={link.href.startsWith("http") ? "_blank" : undefined}
+                  rel="noreferrer"
+                  className="relative z-10 inline-flex items-center rounded-full bg-surface-raised px-5 py-2.5 text-sm ring-1 ring-border-subtle transition-colors hover:text-neon-cyan"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        </TiltCard>
       </Reveal>
     </div>
   );

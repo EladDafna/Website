@@ -10,6 +10,7 @@ import {
   PointMaterial,
   Points,
 } from "@react-three/drei";
+import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import {
   AdditiveBlending,
   Group,
@@ -146,13 +147,33 @@ function Core({ animate }: { animate: boolean }) {
       floatingRange={[-0.25, 0.25]}
     >
       <group ref={ref} position={position} scale={scale}>
+        {/*
+          Each shell uses `emissive` rather than plain `color`. The bloom pass
+          reads scene luminance before tone mapping, and an emissive channel is
+          the standard way to push a material's output past 1.0 there without
+          it looking blown out or losing the wireframe's hue.
+        */}
         <mesh>
           <icosahedronGeometry args={[2.4, 1]} />
-          <meshBasicMaterial wireframe transparent color="#22d3ee" opacity={0.22} />
+          <meshStandardMaterial
+            wireframe
+            transparent
+            color="#22d3ee"
+            emissive="#22d3ee"
+            emissiveIntensity={1.6}
+            opacity={0.3}
+          />
         </mesh>
         <mesh scale={0.78}>
           <icosahedronGeometry args={[2.4, 0]} />
-          <meshBasicMaterial wireframe transparent color="#a855f7" opacity={0.17} />
+          <meshStandardMaterial
+            wireframe
+            transparent
+            color="#a855f7"
+            emissive="#a855f7"
+            emissiveIntensity={1.6}
+            opacity={0.24}
+          />
         </mesh>
         {/*
           Kept as a wireframe rather than a solid. A filled mesh here read as an
@@ -163,10 +184,22 @@ function Core({ animate }: { animate: boolean }) {
           <MeshDistortMaterial
             wireframe
             color="#f472b6"
+            emissive="#f472b6"
+            emissiveIntensity={1.6}
             transparent
-            opacity={0.22}
+            opacity={0.3}
             distort={animate ? 0.4 : 0}
             speed={animate ? 1.6 : 0}
+          />
+        </mesh>
+        {/* The energy core: small, solid, and the brightest thing in the scene. */}
+        <mesh scale={0.16}>
+          <icosahedronGeometry args={[2.4, 2]} />
+          <meshStandardMaterial
+            color="#67e8f9"
+            emissive="#67e8f9"
+            emissiveIntensity={3.5}
+            toneMapped={false}
           />
         </mesh>
       </group>
@@ -225,6 +258,9 @@ function Parallax({
 export default function SpaceScene() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [dpr, setDpr] = useState(1.5);
+  // Bloom is a real-time full-screen pass, the single most expensive thing in
+  // this scene. Dropped first (before resolution) on a declining GPU.
+  const [highQuality, setHighQuality] = useState(true);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -244,10 +280,16 @@ export default function SpaceScene() {
       frameloop={animate ? "always" : "demand"}
       style={{ width: "100%", height: "100%" }}
     >
-      {/* Drop resolution rather than frames if the GPU cannot keep up. */}
+      {/* Drop bloom, then resolution, rather than frames if the GPU struggles. */}
       <PerformanceMonitor
-        onDecline={() => setDpr(1)}
-        onIncline={() => setDpr(1.75)}
+        onDecline={() => {
+          setHighQuality(false);
+          setDpr(1);
+        }}
+        onIncline={() => {
+          setHighQuality(true);
+          setDpr(1.75);
+        }}
       />
       <AdaptiveDpr pixelated />
 
@@ -290,6 +332,19 @@ export default function SpaceScene() {
         />
         <Core animate={animate} />
       </Parallax>
+
+      {highQuality && (
+        <EffectComposer multisampling={0}>
+          <Bloom
+            mipmapBlur
+            luminanceThreshold={0.15}
+            luminanceSmoothing={0.3}
+            intensity={0.9}
+            radius={0.55}
+          />
+          <Vignette eskil={false} offset={0.15} darkness={0.6} />
+        </EffectComposer>
+      )}
     </Canvas>
   );
 }
