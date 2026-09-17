@@ -1,4 +1,7 @@
+import EmailButton from "@/components/EmailButton";
 import { siteConfig, socialLinks } from "@/lib/config";
+
+const LINK_CLASS = "border-0 bg-transparent p-0 text-inherit transition-colors hover:text-neon-cyan";
 
 export default function Footer() {
   return (
@@ -14,12 +17,15 @@ export default function Footer() {
                 href={link.href}
                 target={link.href.startsWith("http") ? "_blank" : undefined}
                 rel="noreferrer"
-                className="transition-colors hover:text-neon-cyan"
+                className={LINK_CLASS}
               >
                 {link.label}
               </a>
             </li>
           ))}
+          <li>
+            <EmailButton email={siteConfig.email} className={`cursor-pointer ${LINK_CLASS}`} />
+          </li>
         </ul>
       </div>
     </footer>

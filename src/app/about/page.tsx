@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import EmailButton from "@/components/EmailButton";
 import Reveal from "@/components/Reveal";
 import TiltCard from "@/components/TiltCard";
 import { siteConfig, socialLinks } from "@/lib/config";
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
   title: "About",
   description: siteConfig.description,
 };
+
+const CONTACT_PILL_CLASS =
+  "relative z-10 inline-flex items-center rounded-full bg-surface-raised px-5 py-2.5 text-sm ring-1 ring-border-subtle transition-colors hover:text-neon-cyan";
 
 /* ---------------------------------------------------------------------------
    Edit the copy below to make this page your own. Everything else on the page
@@ -158,11 +162,12 @@ export default async function AboutPage() {
                   href={link.href}
                   target={link.href.startsWith("http") ? "_blank" : undefined}
                   rel="noreferrer"
-                  className="relative z-10 inline-flex items-center rounded-full bg-surface-raised px-5 py-2.5 text-sm ring-1 ring-border-subtle transition-colors hover:text-neon-cyan"
+                  className={CONTACT_PILL_CLASS}
                 >
                   {link.label}
                 </a>
               ))}
+              <EmailButton email={siteConfig.email} className={`cursor-pointer ${CONTACT_PILL_CLASS}`} />
             </div>
           </div>
         </TiltCard>

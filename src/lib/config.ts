@@ -49,7 +49,7 @@ export const siteConfig = {
   description:
     "Personal portfolio of Elad Dafna, DevOps engineer. Infrastructure, automation and delivery pipelines, pulled live from GitHub.",
   url: resolveSiteUrl(),
-  email: "elad.dafna@hiper-global.com",
+  email: "eladdaf@gmail.com",
   location: "Israel",
 } as const;
 
@@ -80,13 +80,16 @@ export const featuredRepos: string[] = [
  */
 export const hiddenRepos: string[] = ["PS", "Test", "Projects"];
 
-/** Links rendered in the header and footer. */
+/**
+ * Plain external links rendered in the header and footer. Email is deliberately
+ * not here: it opens a provider-choice menu (see EmailButton) rather than a
+ * bare `mailto:` link, so it is rendered separately wherever this list is used.
+ */
 export const socialLinks = [
   {
     label: "GitHub",
     href: githubUsername ? `https://github.com/${githubUsername}` : "https://github.com",
   },
-  { label: "Email", href: `mailto:${siteConfig.email}` },
 ] as const;
 
 export const navLinks = [
